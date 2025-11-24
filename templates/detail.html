@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>论文详情 - Academic Paper Crawler</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-content">
+        <a href="/" class="navbar-brand">
+          <span>📚</span>
+          <span>Academic Papers</span>
+        </a>
+        <ul class="navbar-nav">
+          <li><a href="/">浏览论文</a></li>
+          <li><a href="/crawl">爬取管理</a></li>
+          <li><a href="/statistics">统计信息</a></li>
+          <li><a href="/config">配置</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container">
+      <a
+        href="javascript:history.back()"
+        class="btn btn-secondary"
+        style="margin-bottom: 24px"
+        >← 返回列表</a
+      >
+
+      <div class="card fade-in">
+        <h1 style="margin-bottom: 32px">{{ paper.title }}</h1>
+
+        <div
+          style="
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+          "
+        >
+          <div
+            style="display: flex; gap: 32px; flex-wrap: wrap; font-size: 15px"
+          >
+            <div>
+              <strong style="color: var(--text-secondary)">会议:</strong> {{
+              paper.conference }}
+            </div>
+            <div>
+              <strong style="color: var(--text-secondary)">年份:</strong> {{
+              paper.year }}
+            </div>
+            <div>
+              <strong style="color: var(--text-secondary)">添加时间:</strong> {{
+              paper.created_at }}
+            </div>
+          </div>
+        </div>
+
+        {% if paper.authors %}
+        <div
+          style="
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+          "
+        >
+          <div
+            style="
+              font-weight: 600;
+              color: var(--text-secondary);
+              margin-bottom: 8px;
+              font-size: 13px;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            "
+          >
+            作者
+          </div>
+          <div style="color: var(--text-primary); line-height: 1.6">
+            {{ paper.authors }}
+          </div>
+        </div>
+        {% endif %} {% if paper.abstract %}
+        <div
+          style="
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+          "
+        >
+          <div
+            style="
+              font-weight: 600;
+              color: var(--text-secondary);
+              margin-bottom: 8px;
+              font-size: 13px;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            "
+          >
+            摘要
+          </div>
+          <div style="color: var(--text-primary); line-height: 1.8">
+            {{ paper.abstract }}
+          </div>
+        </div>
+        {% endif %}
+
+        <div>
+          <div
+            style="
+              font-weight: 600;
+              color: var(--text-secondary);
+              margin-bottom: 16px;
+              font-size: 13px;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            "
+          >
+            相关链接
+          </div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap">
+            {% if paper.pdf_url %}
+            <a
+              href="{{ paper.pdf_url }}"
+              target="_blank"
+              class="btn btn-primary"
+              >📄 下载 PDF</a
+            >
+            {% endif %} {% if paper.paper_url %}
+            <a
+              href="{{ paper.paper_url }}"
+              target="_blank"
+              class="btn btn-secondary"
+              >🔗 论文页面</a
+            >
+            {% endif %} {% if paper.doi %}
+            <a href="{{ paper.doi }}" target="_blank" class="btn btn-secondary"
+              >🔍 DOI</a
+            >
+            {% endif %} {% if not paper.pdf_url and not paper.paper_url and not
+            paper.doi %}
+            <p style="color: var(--text-secondary)">暂无可用链接</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

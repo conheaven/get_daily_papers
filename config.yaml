@@ -1,0 +1,70 @@
+# 配置文件 - 顶级安全会议/期刊论文爬取工具
+
+# 会议/期刊配置
+# 说明：enabled=true 表示启用，years 指定要爬取的年份
+conferences:
+# 四大顶级安全会议
+- name: NDSS
+  enabled: true
+  years: [ 2023, 2024, 2025 ]
+  description: "Network and Distributed System Security Symposium"
+
+- name: USENIX Security
+  enabled: true
+  years: [ 2023, 2024, 2025 ]
+  description: "USENIX Security Symposium"
+
+- name: CCS
+  enabled: true
+  years: [ 2023, 2024 ]
+  description: "ACM Conference on Computer and Communications Security"
+
+- name: S&P
+  enabled: true
+  years: [ 2023, 2024, 2025 ]
+  description: "IEEE Symposium on Security and Privacy (Oakland)"
+
+# 其他顶级安全会议（可按需启用）
+- name: CRYPTO
+  enabled: false
+  years: [ 2024 ]
+  description: "International Cryptology Conference"
+
+- name: EUROCRYPT
+  enabled: false
+  years: [ 2024 ]
+  description: "European Cryptology Conference"
+
+- name: ASIACRYPT
+  enabled: false
+  years: [ 2024 ]
+  description: "International Conference on the Theory and Application of Cryptology"
+
+- name: ACSAC
+  enabled: false
+  years: [ 2024 ]
+  description: "Annual Computer Security Applications Conference"
+
+- name: RAID
+  enabled: false
+  years: [ 2024 ]
+  description: "International Symposium on Research in Attacks, Intrusions and Defenses"
+
+# 爬取设置
+crawler:
+  download_pdf: false # 是否自动下载PDF文件
+  pdf_directory: ./papers # PDF保存目录
+  request_timeout: 30 # 请求超时时间（秒）
+  retry_times: 3 # 失败重试次数
+  delay_between_requests: 1 # 请求间隔（秒），避免被封禁
+
+# 数据库设置
+database:
+  path: ./data/papers.db
+
+# Web界面设置
+web:
+  host: 127.0.0.1 # 监听地址
+  port: 5000 # 监听端口
+  debug: true # 调试模式
+  per_page: 20 # 每页显示论文数

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>论文浏览 - Academic Paper Crawler</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="navbar-brand">
+                <span>📚</span>
+                <span>Academic Papers</span>
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="/">浏览论文</a></li>
+                <li><a href="/crawl">爬取管理</a></li>
+                <li><a href="/statistics">统计信息</a></li>
+                <li><a href="/config">配置</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="stats-grid fade-in">
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total_papers }}</div>
+                <div class="stat-label">总论文数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.by_conference|length }}</div>
+                <div class="stat-label">会议数量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ total }}</div>
+                <div class="stat-label">筛选结果</div>
+            </div>
+        </div>
+
+        <div class="filter-bar fade-in">
+            <form method="get" action="/" class="filter-form">
+                <div class="form-group">
+                    <label class="form-label">会议</label>
+                    <select name="conference">
+                        <option value="">全部会议</option>
+                        {% for conf in conferences %}
+                        <option value="{{ conf }}" {% if conf == conference %}selected{% endif %}>{{ conf }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">年份</label>
+                    <select name="year">
+                        <option value="">全部年份</option>
+                        {% for y in years %}
+                        <option value="{{ y }}" {% if y|string == year %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group" style="flex: 2;">
+                    <label class="form-label">搜索</label>
+                    <input type="text" name="search" placeholder="搜索标题或作者..." value="{{ search }}">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">筛选</button>
+                <a href="/" class="btn btn-secondary">重置</a>
+            </form>
+        </div>
+
+        {% if papers %}
+        <div class="papers-list fade-in">
+            {% for paper in papers %}
+            <div class="paper-item">
+                <div class="paper-title">
+                    <a href="/paper/{{ paper.id }}">{{ paper.title }}</a>
+                </div>
+                <div class="paper-meta">
+                    <span>📅 {{ paper.conference }} {{ paper.year }}</span>
+                    <span>🕒 {{ paper.created_at[:10] }}</span>
+                </div>
+                <div class="paper-authors">
+                    👥 {{ paper.authors or '作者信息未提供' }}
+                </div>
+                <div class="paper-links">
+                    {% if paper.pdf_url %}
+                    <a href="{{ paper.pdf_url }}" target="_blank">📄 PDF</a>
+                    {% endif %}
+                    {% if paper.paper_url %}
+                    <a href="{{ paper.paper_url }}" target="_blank">🔗 链接</a>
+                    {% endif %}
+                    {% if paper.doi %}
+                    <a href="{{ paper.doi }}" target="_blank">🔍 DOI</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card empty-state fade-in">
+            <div class="empty-state-icon">📭</div>
+            <h3>暂无论文数据</h3>
+            <p>请前往<a href="/crawl">爬取管理</a>页面开始爬取论文</p>
+        </div>
+        {% endif %}
+
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if page > 1 %}
+            <a href="?page={{ page - 1 }}&conference={{ conference }}&year={{ year }}&search={{ search }}">← 上一页</a>
+            {% endif %}
+            
+            {% for p in range(1, total_pages + 1) %}
+                {% if p == page %}
+                    <span class="current">{{ p }}</span>
+                {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+                    <a href="?page={{ p }}&conference={{ conference }}&year={{ year }}&search={{ search }}">{{ p }}</a>
+                {% elif p == page - 3 or p == page + 3 %}
+                    <span>...</span>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page < total_pages %}
+            <a href="?page={{ page + 1 }}&conference={{ conference }}&year={{ year }}&search={{ search }}">下一页 →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

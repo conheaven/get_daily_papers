@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>爬取管理 - Academic Paper Crawler</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-content">
+        <a href="/" class="navbar-brand">
+          <span>📚</span>
+          <span>Academic Papers</span>
+        </a>
+        <ul class="navbar-nav">
+          <li><a href="/">浏览论文</a></li>
+          <li><a href="/crawl">爬取管理</a></li>
+          <li><a href="/statistics">统计信息</a></li>
+          <li><a href="/config">配置</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="card fade-in">
+        <h2 class="card-title">🚀 快速爬取</h2>
+        <div class="filter-form" style="margin-bottom: 24px">
+          <div class="form-group">
+            <label class="form-label">选择会议</label>
+            <select id="conference">
+              <option value="">请选择会议</option>
+              {% for conf in conferences %} {% if conf.enabled %}
+              <option value="{{ conf.name }}">
+                {{ conf.name }} - {{ conf.description }}
+              </option>
+              {% endif %} {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">选择年份</label>
+            <input
+              type="number"
+              id="year"
+              placeholder="例如: 2024"
+              min="2000"
+              max="2030"
+            />
+          </div>
+          <button class="btn btn-primary" onclick="crawlSingle()">
+            开始爬取
+          </button>
+        </div>
+
+        <button class="btn btn-danger" onclick="crawlAll()">
+          🔥 爬取所有启用的会议
+        </button>
+
+        <div id="status" class="status" style="display: none"></div>
+      </div>
+
+      <div class="card fade-in" style="margin-top: 24px">
+        <h2 class="card-title">📋 已配置的会议/期刊</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 24px">
+          在
+          <code
+            style="
+              background: var(--bg-secondary);
+              padding: 4px 8px;
+              border-radius: 4px;
+            "
+            >config.yaml</code
+          >
+          中可以添加更多会议或期刊
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          {% for conf in conferences %}
+          <div
+            class="card"
+            style="{% if not conf.enabled %}opacity: 0.5;{% endif %}"
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 24px;
+              "
+            >
+              <div style="flex: 1">
+                <h3 style="margin-bottom: 8px">
+                  {{ conf.name }} {% if not conf.enabled %}
+                  <span
+                    class="badge"
+                    style="
+                      background: var(--bg-secondary);
+                      color: var(--text-secondary);
+                    "
+                    >未启用</span
+                  >
+                  {% endif %}
+                </h3>
+                <p
+                  style="
+                    color: var(--text-secondary);
+                    margin-bottom: 8px;
+                    font-size: 14px;
+                  "
+                >
+                  {{ conf.description or '暂无描述' }}
+                </p>
+                <div style="color: var(--text-secondary); font-size: 13px">
+                  年份: {{ conf.years|join(', ') }}
+                </div>
+              </div>
+              {% if conf.enabled %}
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                {% for year in conf.years %}
+                <button
+                  class="btn btn-primary"
+                  onclick="crawlSingle('{{ conf.name }}', {{ year }})"
+                >
+                  {{ year }}
+                </button>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card fade-in" style="margin-top: 24px">
+        <h2 class="card-title">📝 爬取日志</h2>
+        <div class="log-display" id="log">等待开始爬取...</div>
+      </div>
+    </div>
+
+    <script>
+      function showStatus(message, type = "info") {
+        const status = document.getElementById("status");
+        status.textContent = message;
+        status.className = "status status-" + type;
+        status.style.display = "block";
+
+        if (type === "success" || type === "error") {
+          setTimeout(() => {
+            status.style.display = "none";
+          }, 5000);
+        }
+      }
+
+      function addLog(message) {
+        const log = document.getElementById("log");
+        const timestamp = new Date().toLocaleTimeString("zh-CN", {
+          hour12: false,
+        });
+        log.textContent += `[${timestamp}] ${message}\n`;
+        log.scrollTop = log.scrollHeight;
+      }
+
+      function crawlSingle(confName, confYear) {
+        const conference =
+          confName || document.getElementById("conference").value;
+        const year = confYear || document.getElementById("year").value;
+
+        if (!conference || !year) {
+          showStatus("请选择会议和年份", "error");
+          return;
+        }
+
+        showStatus(`正在爬取 ${conference} ${year}...`, "info");
+        addLog(`开始爬取 ${conference} ${year}`);
+
+        const formData = new FormData();
+        formData.append("conference", conference);
+        formData.append("year", year);
+
+        fetch("/crawl", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              showStatus(data.message, "success");
+              addLog(`✓ ${data.message}`);
+            } else {
+              showStatus(data.message, "error");
+              addLog(`✗ 失败: ${data.message}`);
+            }
+          })
+          .catch((error) => {
+            showStatus("爬取失败: " + error, "error");
+            addLog(`✗ 错误: ${error}`);
+          });
+      }
+
+      function crawlAll() {
+        if (!confirm("确定要爬取所有启用的会议吗？这可能需要较长时间。")) {
+          return;
+        }
+
+        showStatus("正在批量爬取...", "info");
+        addLog("开始批量爬取所有启用的会议");
+
+        fetch("/api/crawl_all", {
+          method: "POST",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              showStatus(data.message, "success");
+              addLog(`✓ ${data.message}`);
+            } else {
+              showStatus(data.message, "error");
+              addLog(`✗ 失败: ${data.message}`);
+            }
+          })
+          .catch((error) => {
+            showStatus("批量爬取失败: " + error, "error");
+            addLog(`✗ 错误: ${error}`);
+          });
+      }
+    </script>
+  </body>
+</html>

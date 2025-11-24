@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>配置信息 - Academic Paper Crawler</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-content">
+        <a href="/" class="navbar-brand">
+          <span>📚</span>
+          <span>Academic Papers</span>
+        </a>
+        <ul class="navbar-nav">
+          <li><a href="/">浏览论文</a></li>
+          <li><a href="/crawl">爬取管理</a></li>
+          <li><a href="/statistics">统计信息</a></li>
+          <li><a href="/config">配置</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="card fade-in">
+        <h2 class="card-title">⚙️ 配置说明</h2>
+        <div
+          style="
+            background: rgba(0, 122, 255, 0.05);
+            border-left: 4px solid var(--primary-blue);
+            padding: 20px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+          "
+        >
+          <h3 style="color: var(--primary-blue); margin-bottom: 12px">
+            如何添加新会议/期刊？
+          </h3>
+          <p style="color: var(--text-primary); line-height: 1.8">
+            1. 编辑
+            <code
+              style="
+                background: var(--bg-secondary);
+                padding: 4px 8px;
+                border-radius: 4px;
+              "
+              >config.yaml</code
+            >
+            文件<br />
+            2. 在
+            <code
+              style="
+                background: var(--bg-secondary);
+                padding: 4px 8px;
+                border-radius: 4px;
+              "
+              >conferences</code
+            >
+            部分添加新条目<br />
+            3. 设置
+            <code
+              style="
+                background: var(--bg-secondary);
+                padding: 4px 8px;
+                border-radius: 4px;
+              "
+              >enabled: true</code
+            >
+            启用<br />
+            4. 指定要爬取的
+            <code
+              style="
+                background: var(--bg-secondary);
+                padding: 4px 8px;
+                border-radius: 4px;
+              "
+              >years</code
+            ><br />
+            5. （可选）在
+            <code
+              style="
+                background: var(--bg-secondary);
+                padding: 4px 8px;
+                border-radius: 4px;
+              "
+              >src/crawlers/conference_crawlers.py</code
+            >
+            中实现专用爬虫
+          </p>
+        </div>
+
+        <div
+          style="
+            background: rgba(52, 199, 89, 0.05);
+            border-left: 4px solid var(--success);
+            padding: 20px;
+            border-radius: 8px;
+          "
+        >
+          <h3 style="color: var(--success); margin-bottom: 12px">
+            支持的数据源
+          </h3>
+          <p style="color: var(--text-primary); line-height: 1.8">
+            • <strong>DBLP</strong>:
+            计算机科学文献数据库（主要数据源，结构稳定）<br />
+            • <strong>会议官网</strong>:
+            各会议官方网站（补充数据源，信息更全）<br />
+            • 工具会自动合并多个数据源的结果并去重
+          </p>
+        </div>
+      </div>
+
+      <div class="card fade-in" style="margin-top: 24px">
+        <h2 class="card-title">📄 当前配置文件</h2>
+        <div class="log-display" style="max-height: 500px">
+          {{ config | tojson(indent=2) }}
+        </div>
+      </div>
+
+      <div class="card fade-in" style="margin-top: 24px">
+        <h2 class="card-title">📝 配置示例</h2>
+        <p style="margin-bottom: 16px; color: var(--text-secondary)">
+          添加新会议的配置模板：
+        </p>
+        <div class="log-display">
+          # 在 config.yaml 的 conferences 部分添加 - name: 新会议名称 enabled:
+          true years: [2023, 2024, 2025] description: "会议的完整名称或简介"
+        </div>
+      </div>
+
+      <div class="card fade-in" style="margin-top: 24px">
+        <h2 class="card-title">🔧 常用配置项</h2>
+        <table>
+          <tr>
+            <td>
+              <code
+                style="
+                  background: var(--bg-secondary);
+                  padding: 4px 8px;
+                  border-radius: 4px;
+                "
+                >crawler.request_timeout</code
+              >
+            </td>
+            <td>请求超时时间（秒）</td>
+          </tr>
+          <tr>
+            <td>
+              <code
+                style="
+                  background: var(--bg-secondary);
+                  padding: 4px 8px;
+                  border-radius: 4px;
+                "
+                >crawler.retry_times</code
+              >
+            </td>
+            <td>失败重试次数</td>
+          </tr>
+          <tr>
+            <td>
+              <code
+                style="
+                  background: var(--bg-secondary);
+                  padding: 4px 8px;
+                  border-radius: 4px;
+                "
+                >crawler.delay_between_requests</code
+              >
+            </td>
+            <td>请求间隔时间（秒）</td>
+          </tr>
+          <tr>
+            <td>
+              <code
+                style="
+                  background: var(--bg-secondary);
+                  padding: 4px 8px;
+                  border-radius: 4px;
+                "
+                >web.per_page</code
+              >
+            </td>
+            <td>每页显示论文数</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

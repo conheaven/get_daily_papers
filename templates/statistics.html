@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>统计信息 - Academic Paper Crawler</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-content">
+        <a href="/" class="navbar-brand">
+          <span>📚</span>
+          <span>Academic Papers</span>
+        </a>
+        <ul class="navbar-nav">
+          <li><a href="/">浏览论文</a></li>
+          <li><a href="/crawl">爬取管理</a></li>
+          <li><a href="/statistics">统计信息</a></li>
+          <li><a href="/config">配置</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="card fade-in">
+        <h2 class="card-title">📊 总体统计</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">{{ stats.total_papers }}</div>
+            <div class="stat-label">论文总数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ stats.by_conference|length }}</div>
+            <div class="stat-label">会议数量</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">
+              {{ stats.last_update[:10] if stats.last_update else '无' }}
+            </div>
+            <div class="stat-label">最后更新</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card fade-in" style="margin-top: 24px">
+        <h2 class="card-title">📈 各会议论文数量</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>会议名称</th>
+              <th>论文数量</th>
+              <th>占比</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for conf, count in stats.by_conference.items() %}
+            <tr>
+              <td><strong>{{ conf }}</strong></td>
+              <td>{{ count }}</td>
+              <td>{{ "%.1f"|format(count / stats.total_papers * 100) }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card fade-in" style="margin-top: 24px">
+        <h2 class="card-title">📝 爬取历史</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>会议</th>
+              <th>年份</th>
+              <th>论文数</th>
+              <th>状态</th>
+              <th>时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in history %}
+            <tr>
+              <td><strong>{{ item.conference }}</strong></td>
+              <td>{{ item.year }}</td>
+              <td>{{ item.papers_count }}</td>
+              <td>
+                {% if item.status == 'success' %}
+                <span class="badge badge-success">成功</span>
+                {% else %}
+                <span class="badge badge-warning">{{ item.status }}</span>
+                {% endif %}
+              </td>
+              <td>{{ item.created_at }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>
